@@ -170,14 +170,13 @@ enum SHAPE { SQUARE, WIDE, TALL }; // Shape Options (See Sprite Dimension Chart)
 #define ATTR1_HFLIP        (1 << 12) // Horizontal Flip
 #define ATTR1_VFLIP        (1 << 13) // Vertical Flip
 #define ATTR1_AFFINE(matrix)  (((matrix) & 31) << 9)
-
 #define ATTR1_SIZE(size)   (((size) & 3) << 14) // Size
 enum SIZE { TINY, SMALL, MEDIUM, LARGE }; // Size Options (See Sprite Dimension Chart)
 
 // Attribute 2
-#define ATTR2_TILEID(col, row)  OFFSET((col), (row), 32)
-#define ATTR2_PRIORITY(num)     ((num) << 10)
-#define ATTR2_PALROW(row)       ((row) << 12)
+#define ATTR2_TILEID(col, row)  OFFSET(((col) & 31), ((row) & 31), 32)
+#define ATTR2_PRIORITY(num)     (((num) & 3) << 10)
+#define ATTR2_PALROW(row)       (((row) & 15) << 12)
 
 // Sprite Dimension Chart
 //        -------------------------------------
