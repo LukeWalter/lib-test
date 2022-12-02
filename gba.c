@@ -180,6 +180,14 @@ void hideSprites() {
 
 } // hideSprites
 
+void setAffineMatrix(int matrix, u16 a, u16 b, u16 c, u16 d) {
+    affine[matrix].a = a;
+    affine[matrix].b = b;
+    affine[matrix].c = c;
+    affine[matrix].d = d;
+
+} // setAffineMatrix
+
 // Copies the values of shadowOAM into object attribute memory
 void updateOAM() {
     DMANow(3, shadowOAM, OAM, 512);

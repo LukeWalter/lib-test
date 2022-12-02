@@ -35,7 +35,7 @@ int main() {
     while (1) {
 
         oldButtons = buttons;
-        buttons = BUTTONS;
+        buttons = REG_BUTTONS;
 
         if (BUTTON_PRESSED(BUTTON_START)) {
 

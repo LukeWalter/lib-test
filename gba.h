@@ -192,7 +192,7 @@ enum SIZE { TINY, SMALL, MEDIUM, LARGE }; // Size Options (See Sprite Dimension 
 
 // Sprite Functions
 void hideSprites();
-void setAffineMatrix(u16 a, u16 b, u16 c, u16 d);
+void setAffineMatrix(int matrix, u16 a, u16 b, u16 c, u16 d);
 void updateOAM();
 
 // Generic struct for animated sprite
@@ -218,7 +218,7 @@ typedef struct {
 // ================================== INPUT ===================================
 
 // Button Register
-#define BUTTONS (*(volatile unsigned short*) 0x04000130)
+#define REG_BUTTONS (*(volatile unsigned short*) 0x04000130)
 
 // Button Masks
 #define BUTTON_A (1 << 0)
@@ -237,9 +237,9 @@ extern unsigned short oldButtons;
 extern unsigned short buttons;
 
 // Button Macros
-#define BUTTON_HELD(key) (~BUTTONS & (key))
-#define BUTTON_PRESSED(key) (!(~oldButtons & (key)) && (~BUTTONS & (key)))
-#define BUTTON_RELEASED(key) ((~oldButtons & (key)) && !(~BUTTONS & (key)))
+#define BUTTON_HELD(key) (~REG_BUTTONS & (key))
+#define BUTTON_PRESSED(key) (!(~oldButtons & (key)) && (~REG_BUTTONS & (key)))
+#define BUTTON_RELEASED(key) ((~oldButtons & (key)) && !(~REG_BUTTONS & (key)))
 
 
 // =================================== DMA ====================================
