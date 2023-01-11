@@ -69,7 +69,7 @@ void initialize() {
 
     hideSprites();
 
-    buttons = BUTTONS;
+    buttons = REG_BUTTONS;
     oldButtons = 0;
 
     initMatrices();

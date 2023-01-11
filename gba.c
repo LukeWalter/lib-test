@@ -10,17 +10,17 @@ OBJ_ATTR shadowOAM[128];
 AFFINE_MATRIX* affine = (AFFINE_MATRIX*) shadowOAM;
 
 // Set a pixel on the screen in Mode 3
-void setPixel3(int col, int row, unsigned short color) {
-    videoBuffer[OFFSET(col, row, SCREENWIDTH)] = color;
+void setPixel3(int x, int y, unsigned short color) {
+    videoBuffer[OFFSET(x, y, SCREENWIDTH)] = color;
 
 } // setPixel3
 
 // Set a pixel on the screen in Mode 4
-void setPixel4(int col, int row, unsigned char colorIndex) {
+void setPixel4(int x, int y, unsigned char colorIndex) {
 
-    volatile unsigned short pixelData = videoBuffer[OFFSET(col, row, SCREENWIDTH) / 2];
+    volatile unsigned short pixelData = videoBuffer[OFFSET(x, y, SCREENWIDTH) / 2];
     
-    if (col & 1) {
+    if (x & 1) {
         pixelData &= 0x00FF;
         pixelData |= colorIndex << 8;
     
@@ -30,50 +30,50 @@ void setPixel4(int col, int row, unsigned char colorIndex) {
     
     } // if
     
-    videoBuffer[OFFSET(col, row, SCREENWIDTH) / 2] = pixelData;
+    videoBuffer[OFFSET(x, y, SCREENWIDTH) / 2] = pixelData;
 
 } // setPixel4
 
 // Draw a rectangle at the specified location and size in Mode 3
-void drawRect3(int col, int row, int width, int height, volatile unsigned short color) {
+void drawRect3(int x, int y, int width, int height, volatile unsigned short color) {
 
-    for (int r = 0; r < height; r++) {
-        DMANow(3, &color, &videoBuffer[OFFSET(col, row + r, SCREENWIDTH)], DMA_SOURCE_FIXED | width);
+    for (int h = 0; h < height; h++) {
+        DMANow(3, &color, &videoBuffer[OFFSET(x, y + h, SCREENWIDTH)], DMA_SOURCE_FIXED | width);
         
     } // for
 
 } // drawRect3
 
 // Draw a rectangle at the specified location and size in Mode 4
-void drawRect4(int col, int row, int width, int height, volatile unsigned char colorIndex) {
+void drawRect4(int x, int y, int width, int height, volatile unsigned char colorIndex) {
 
     volatile unsigned short pixelData = colorIndex | (colorIndex << 8);
     
-    for (int r = 0; r < height; r++) {
+    for (int h = 0; h < height; h++) {
 
         // Ensure we don't DMA 0 copies
         if (width == 1) {
-            setPixel4(col, row + r, colorIndex);
+            setPixel4(x, y + h, colorIndex);
 
         } else if (width == 2) {
-            setPixel4(col, row + r, colorIndex);
-            setPixel4(col + 1, row + r, colorIndex);
+            setPixel4(x, y + h, colorIndex);
+            setPixel4(x + 1, y + h, colorIndex);
         
-        } else if ((col & 1) && (width & 1)) { // Odd width odd col
-            setPixel4(col, row + r, colorIndex);
-            DMANow(3, &pixelData, &videoBuffer[OFFSET(col + 1, row + r, SCREENWIDTH) / 2], DMA_SOURCE_FIXED | (width - 1) / 2);
+        } else if ((x & 1) && (width & 1)) { // Odd width odd col
+            setPixel4(x, y + h, colorIndex);
+            DMANow(3, &pixelData, &videoBuffer[OFFSET(x + 1, y + h, SCREENWIDTH) / 2], DMA_SOURCE_FIXED | (width - 1) / 2);
         
         } else if (width & 1) { // Even col odd width
-            DMANow(3, &pixelData, &videoBuffer[OFFSET(col, row + r, SCREENWIDTH) / 2], DMA_SOURCE_FIXED | (width - 1) / 2);
-            setPixel4(col + width - 1, row + r, colorIndex);
+            DMANow(3, &pixelData, &videoBuffer[OFFSET(x, y + h, SCREENWIDTH) / 2], DMA_SOURCE_FIXED | (width - 1) / 2);
+            setPixel4(x + width - 1, y + h, colorIndex);
             
-        } else if (col & 1) { // Odd col even width
-            setPixel4(col, row + r, colorIndex);
-            DMANow(3, &pixelData, &videoBuffer[OFFSET(col + 1, row + r, SCREENWIDTH) / 2], DMA_SOURCE_FIXED | (width - 2) / 2);
-            setPixel4(col + width - 1, row + r, colorIndex);
+        } else if (x & 1) { // Odd col even width
+            setPixel4(x, y + h, colorIndex);
+            DMANow(3, &pixelData, &videoBuffer[OFFSET(x + 1, y + h, SCREENWIDTH) / 2], DMA_SOURCE_FIXED | (width - 2) / 2);
+            setPixel4(x + width - 1, y + h, colorIndex);
         
         } else { // Even col even width
-            DMANow(3, &pixelData, &videoBuffer[OFFSET(col, row + r, SCREENWIDTH) / 2], DMA_SOURCE_FIXED | width / 2);
+            DMANow(3, &pixelData, &videoBuffer[OFFSET(x, y + h, SCREENWIDTH) / 2], DMA_SOURCE_FIXED | width / 2);
         
         } // if
 
@@ -96,20 +96,20 @@ void fillScreen4(volatile unsigned char colorIndex) {
 } // fillScreen4
 
 // Draw an image at the specified location and size in Mode 3
-void drawImage3(int col, int row, int width, int height, const unsigned short *image) {
+void drawImage3(int x, int y, int width, int height, const unsigned short *image) {
 
-    for (int r = 0; r < height; r++) {
-        DMANow(3, &image[OFFSET(0, r, width)], &videoBuffer[OFFSET(col, row + r, SCREENWIDTH)], width);
+    for (int h = 0; h < height; h++) {
+        DMANow(3, &image[OFFSET(0, h, width)], &videoBuffer[OFFSET(x, y + h, SCREENWIDTH)], width);
     
     } // for
 
 } // drawImage3
 
 // Draw an image at the specified location and size in Mode 4 (must be even col and width)
-void drawImage4(int col, int row, int width, int height, const unsigned short *image) {
+void drawImage4(int x, int y, int width, int height, const unsigned short *image) {
     
-    for (int i = 0; i < height; i++) {
-        DMANow(3, &image[OFFSET(0, i, width / 2)], &videoBuffer[OFFSET(col, row + i, SCREENWIDTH) / 2], width / 2);
+    for (int h = 0; h < height; h++) {
+        DMANow(3, &image[OFFSET(0, h, width / 2)], &videoBuffer[OFFSET(x, y + h, SCREENWIDTH) / 2], width / 2);
     
     } // for
 
@@ -165,10 +165,15 @@ void DMANow(int channel, volatile const void *src, volatile void *dst, unsigned 
 } // DMANow
 
 // Return true if the two rectangular areas are overlapping
-int collision(int colA, int rowA, int widthA, int heightA, int colB, int rowB, int widthB, int heightB) {    
-    return rowA < rowB + heightB - 1 && rowA + heightA - 1 > rowB && colA < colB + widthB - 1 && colA + widthA - 1 > colB;
+int collision(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2) {    
+    return y1 < y2 + height2 - 1 && y1 + height1 - 1 > y2 && x1 < x2 + width2 - 1 && x1 + width1 - 1 > x2;
 
 } // collision
+
+void hide(ANISPRITE* sprite) {
+    sprite->attributes->attr0 = ATTR0_OM(HIDE);
+
+} // hide
 
 // Hides all sprites in the shadowOAM; Must DMA the shadowOAM into the OAM after calling this function
 void hideSprites() {

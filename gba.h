@@ -10,7 +10,7 @@ typedef unsigned long long u64;
 // Common Macros
 #define TRUE 1
 #define FALSE 0
-#define OFFSET(col, row, rowlen) ((row) * (rowlen) + (col))
+#define OFFSET(x, y, width) ((y) * (width) + (x))
 
 // ================================= DISPLAY ==================================
 
@@ -101,17 +101,17 @@ typedef struct {
 #define SPRITEBLOCK ((CB*) 0x06010000)
 
 // Mode 3 Drawing Functions
-void setPixel3(int col, int row, unsigned short color);
-void drawRect3(int col, int row, int width, int height, volatile unsigned short color);
+void setPixel3(int x, int y, unsigned short color);
+void drawRect3(int x, int y, int width, int height, volatile unsigned short color);
 void fillScreen3(volatile unsigned short color);
-void drawImage3(int col, int row, int width, int height, const unsigned short *image);
+void drawImage3(int x, int y, int width, int height, const unsigned short *image);
 void drawFullscreenImage3(const unsigned short *image);
 
 // Mode 4 Drawing Functions
-void setPixel4(int col, int row, unsigned char colorIndex);
-void drawRect4(int col, int row, int width, int height, volatile unsigned char colorIndex);
+void setPixel4(int x, int y, unsigned char colorIndex);
+void drawRect4(int x, int y, int width, int height, volatile unsigned char colorIndex);
 void fillScreen4(volatile unsigned char colorIndex);
-void drawImage4(int col, int row, int width, int height, const unsigned short *image);
+void drawImage4(int x, int y, int width, int height, const unsigned short *image);
 void drawFullscreenImage4(const unsigned short *image);
 
 // Miscellaneous Drawing Functions
@@ -189,11 +189,6 @@ enum SIZE { TINY, SMALL, MEDIUM, LARGE }; // Size Options (See Sprite Dimension 
 //  TALL  |  8x16  | 8x32   | 16x32  | 32x64  |
 // --------------------------------------------
 
-// Sprite Functions
-void hideSprites();
-void setAffineMatrix(int matrix, u16 a, u16 b, u16 c, u16 d);
-void updateOAM();
-
 // Generic struct for animated sprite
 typedef struct {
 
@@ -213,6 +208,17 @@ typedef struct {
     int affineMatrix;
 
 } ANISPRITE;
+
+// Sprite Functions
+void hide(ANISPRITE* sprite);
+void hideSprites();
+void setAffineMatrix(int matrix, u16 a, u16 b, u16 c, u16 d);
+void updateOAM();
+
+// ========================== TILEMAP MODIFICATION ============================
+
+#define TILEID(x, y) OFFSET((x), (y), 32)
+#define TILEMAP(screenblock, x, y) SCREENBLOCK[(screenblock)].tilemap(TILEID((x), (y)))
 
 // ================================== INPUT ===================================
 
@@ -342,7 +348,7 @@ typedef void (*ihp)(void);
 // ============================== MISCELLANEOUS ===============================
 
 // Collision function
-int collision(int colA, int rowA, int widthA, int heightA, int colB, int rowB, int widthB, int heightB);
+int collision(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2);
 
 // Saving
 #define GAMEPAK_ROM ((u8*)0x0E000000)
